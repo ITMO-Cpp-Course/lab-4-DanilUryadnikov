@@ -77,11 +77,13 @@ TEST_CASE("FileHandle append mode appends data", "[filehandle]")
     {
         FileHandle fh(filename, FileHandle::Mode::Write);
         REQUIRE(fh.is_open());
-        ::write(fh.fd(), "hello", 5);
+        ssize_t ret = ::write(fh.fd(), "hello", 5);
+        REQUIRE(ret == 5);
     }
     {
         FileHandle fh(filename, FileHandle::Mode::Append);
-        ::write(fh.fd(), "world", 5);
+        ssize_t ret = ::write(fh.fd(), "world", 5);
+        REQUIRE(ret == 5);
     }
     std::ifstream ifs(filename);
     std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
@@ -106,13 +108,12 @@ TEST_CASE("FileHandle move assignment transfers ownership", "[filehandle]")
 {
     std::string filename = create_temp_file();
     FileHandle fh1(filename, FileHandle::Mode::Read);
-    FileHandle fh2("dummy.txt", FileHandle::Mode::Write); // создаём другой файл
+    FileHandle fh2("dummy.txt", FileHandle::Mode::Write);
     int fd1 = fh1.fd();
     fh2 = std::move(fh1);
     REQUIRE(fh2.is_open());
     REQUIRE(fh2.fd() == fd1);
     REQUIRE_FALSE(fh1.is_open());
-    // Удаляем временные файлы
     fs::remove(filename);
     fs::remove("dummy.txt");
 }
