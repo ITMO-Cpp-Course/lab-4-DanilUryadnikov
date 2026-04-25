@@ -86,7 +86,13 @@ TEST_CASE("FileHandle append mode appends data", "[filehandle]")
         REQUIRE(ret == 5);
     }
     std::ifstream ifs(filename);
-    std::string content((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    REQUIRE(ifs.is_open());
+    std::string content;
+    char ch;
+    while (ifs.get(ch))
+    {
+        content += ch;
+    }
     REQUIRE(content == "helloworld");
     fs::remove(filename);
 }
